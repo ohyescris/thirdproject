@@ -1,0 +1,1 @@
+INSERT INTO tb_client (name, cpf, income, birth_date, children) VALUES ('Lucas Lopes', '054.012.821-36', 5000.00, '1995-05-30', 2);
