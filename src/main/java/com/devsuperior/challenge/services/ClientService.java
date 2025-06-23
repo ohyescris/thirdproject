@@ -68,6 +68,9 @@ public class ClientService {
 			repository.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Falha de integridade referencial");
+			// este erro provavelmente não será chamado, já que há apenas uma tabela no banco
+			// e não há como uma tabela criar relações estrangeiras com ela mesma, entretanto, 
+			// não removerei o método de captura desta exceção para deixar salvo
 		}
 	}
 	

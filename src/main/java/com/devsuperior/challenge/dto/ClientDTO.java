@@ -1,13 +1,12 @@
 package com.devsuperior.challenge.dto;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 import com.devsuperior.challenge.entities.Client;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 
 public class ClientDTO {
 
@@ -15,22 +14,19 @@ public class ClientDTO {
 
 	@NotBlank(message = "Campo requerido")
 	private String name;
-
 	private String cpf;
-
-	@PositiveOrZero(message = "Valor negativo")
+	@Positive(message = "A renda deve ser positiva")
 	private Double income;
-
 	@PastOrPresent(message = "Data de nascimento inválida")
 	private LocalDate birthDate;
-
-	@PositiveOrZero(message = "Valor negativo")
 	private Integer children;
 
 	public ClientDTO() {
 	}
 
-	public ClientDTO(Long id, String name, String cpf, Double income, LocalDate birthDate, Integer children) {
+	public ClientDTO(Long id, @NotBlank(message = "Campo requerido") String name, String cpf, @Positive Double income,
+			@PastOrPresent(message = "Data de nascimento inválida") LocalDate birthDate, Integer children) {
+		super();
 		this.id = id;
 		this.name = name;
 		this.cpf = cpf;
@@ -95,22 +91,4 @@ public class ClientDTO {
 	public void setChildren(Integer children) {
 		this.children = children;
 	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ClientDTO other = (ClientDTO) obj;
-		return Objects.equals(id, other.id);
-	}
-
 }
