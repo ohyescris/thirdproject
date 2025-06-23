@@ -16,17 +16,18 @@ import com.devsuperior.challenge.repositories.ClientRepository;
 import com.devsuperior.challenge.services.exceptions.DatabaseException;
 import com.devsuperior.challenge.services.exceptions.ResourceNotFoundException;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class ClientService {
 
 	@Autowired
 	private ClientRepository repository;
-	
+
 	@Transactional(readOnly = true)
 	public ClientDTO findById(Long id) {
 		Optional<Client> result = repository.findById(id);
-		Client client = result.orElseThrow(
-				() -> new ResourceNotFoundException("Recurso não encontrado."));
+		Client client = result.orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado."));
 		ClientDTO dto = new ClientDTO(client);
 		return dto;
 	}
@@ -36,7 +37,7 @@ public class ClientService {
 		Page<Client> result = repository.findAll(pageable);
 		return result.map(x -> new ClientDTO(x));
 	}
-	
+
 	@Transactional
 	public ClientDTO insert(ClientDTO dto) {
 		Client entity = new Client();
@@ -50,15 +51,19 @@ public class ClientService {
 
 	@Transactional
 	public ClientDTO update(Long id, ClientDTO dto) {
-		Client entity = repository.getReferenceById(id);
+		try {
+			Client entity = repository.getReferenceById(id);
+			copyDtoToEntity(dto, entity);
 
-		copyDtoToEntity(dto, entity);
+			entity = repository.save(entity);
 
-		entity = repository.save(entity);
-
-		return new ClientDTO(entity);
+			return new ClientDTO(entity);
+		}
+		catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException("Recurso não encontrado");
+		}
 	}
-	
+
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public void delete(Long id) {
 		if (!repository.existsById(id)) {
@@ -68,12 +73,14 @@ public class ClientService {
 			repository.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Falha de integridade referencial");
-			// este erro provavelmente não será chamado, já que há apenas uma tabela no banco
-			// e não há como uma tabela criar relações estrangeiras com ela mesma, entretanto, 
+			// este erro provavelmente não será chamado, já que há apenas uma tabela no
+			// banco
+			// e não há como uma tabela criar relações estrangeiras com ela mesma,
+			// entretanto,
 			// não removerei o método de captura desta exceção para deixar salvo
 		}
 	}
-	
+
 	private void copyDtoToEntity(ClientDTO dto, Client entity) {
 		entity.setName(dto.getName());
 		entity.setCpf(dto.getCpf());
